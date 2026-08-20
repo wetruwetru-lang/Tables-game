@@ -1,0 +1,805 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>Капсулы vs Фрукты</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&family=Nunito:wght@500;700;800&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg-0:#120a1d;
+    --bg-1:#1c1130;
+    --panel:#241736;
+    --panel-edge:#3a2456;
+    --gold:#e8b64c;
+    --gold-dim:#8a6a2c;
+    --red:#e0455f;
+    --blue:#3aa0d1;
+    --yellow:#e0b23a;
+    --purple:#9b6bd6;
+    --ink:#f3e9ff;
+    --ink-dim:#b6a4d6;
+  }
+  *{box-sizing:border-box; -webkit-tap-highlight-color:transparent;}
+  html,body{margin:0; height:100%;}
+  body{
+    background:
+      radial-gradient(circle at 20% 0%, #2a1a44 0%, transparent 55%),
+      radial-gradient(circle at 85% 15%, #1c2f4a 0%, transparent 50%),
+      linear-gradient(180deg, var(--bg-0), #0a0613 90%);
+    color:var(--ink);
+    font-family:'Nunito', sans-serif;
+    min-height:100%;
+    display:flex;
+    flex-direction:column;
+    align-items:center;
+    padding:14px 10px 26px;
+    overflow-x:hidden;
+  }
+  .brand{
+    font-family:'Press Start 2P', monospace;
+    font-size:13px;
+    letter-spacing:1px;
+    color:var(--gold);
+    text-shadow:0 0 12px rgba(232,182,76,.5);
+    margin:6px 0 4px;
+    text-align:center;
+  }
+  .brand span{color:var(--blue); text-shadow:0 0 12px rgba(58,160,209,.6);}
+  .tagline{color:var(--ink-dim); font-size:12.5px; margin-bottom:14px; text-align:center;}
+
+  .stage{
+    position:relative;
+    width:100%;
+    max-width:420px;
+  }
+
+  /* ---------- MENU ---------- */
+  .card{
+    background:linear-gradient(180deg, var(--panel), #1a0f2b);
+    border:1px solid var(--panel-edge);
+    border-radius:18px;
+    padding:20px 18px;
+    box-shadow:0 10px 40px rgba(0,0,0,.45), inset 0 1px 0 rgba(255,255,255,.04);
+  }
+  .section-label{
+    font-family:'Press Start 2P', monospace;
+    font-size:9px;
+    color:var(--purple);
+    letter-spacing:1px;
+    margin:0 0 10px;
+  }
+  .mode-row{display:flex; gap:10px; margin-bottom:18px;}
+  .mode-btn{
+    flex:1;
+    padding:16px 8px 12px;
+    border-radius:14px;
+    border:2px solid var(--panel-edge);
+    background:#150c22;
+    color:var(--ink-dim);
+    font-family:'Nunito';
+    font-weight:800;
+    font-size:14px;
+    display:flex; flex-direction:column; align-items:center; gap:6px;
+    cursor:pointer;
+    transition:.15s;
+  }
+  .mode-btn .ico{font-size:28px;}
+  .mode-btn.active{
+    border-color:var(--gold);
+    background:linear-gradient(180deg, rgba(232,182,76,.16), rgba(232,182,76,.03));
+    color:var(--gold);
+    box-shadow:0 0 18px rgba(232,182,76,.25);
+  }
+  .diff-row{display:flex; gap:8px; margin-bottom:20px;}
+  .diff-btn{
+    flex:1;
+    padding:10px 4px;
+    border-radius:10px;
+    border:2px solid var(--panel-edge);
+    background:#150c22;
+    color:var(--ink-dim);
+    font-weight:800;
+    font-size:12.5px;
+    cursor:pointer;
+    transition:.15s;
+  }
+  .diff-btn.active{
+    border-color:var(--blue);
+    color:#dff3ff;
+    background:linear-gradient(180deg, rgba(58,160,209,.22), rgba(58,160,209,.04));
+    box-shadow:0 0 14px rgba(58,160,209,.25);
+  }
+  .diff-desc{color:var(--ink-dim); font-size:11.5px; text-align:center; margin:-10px 0 18px; min-height:16px;}
+  .play-btn{
+    width:100%;
+    padding:15px;
+    border:none;
+    border-radius:14px;
+    background:linear-gradient(180deg, var(--gold), #b9822a);
+    color:#241304;
+    font-family:'Press Start 2P', monospace;
+    font-size:12px;
+    letter-spacing:1px;
+    cursor:pointer;
+    box-shadow:0 6px 0 #7a5518, 0 10px 22px rgba(232,182,76,.25);
+    transition:.08s;
+  }
+  .play-btn:active{ transform:translateY(4px); box-shadow:0 2px 0 #7a5518;}
+
+  /* ---------- HUD ---------- */
+  .hud{
+    display:flex; justify-content:space-between; align-items:center;
+    width:100%; max-width:420px; margin-bottom:8px; padding:0 4px;
+  }
+  .hud-chip{
+    background:var(--panel); border:1px solid var(--panel-edge); border-radius:10px;
+    padding:6px 12px; text-align:center; min-width:64px;
+  }
+  .hud-chip b{display:block; font-size:16px; color:var(--gold); font-family:'Press Start 2P'; }
+  .hud-chip span{font-size:9px; color:var(--ink-dim); letter-spacing:.5px;}
+  .hud-btn{
+    background:#1e1330; border:1px solid var(--panel-edge); color:var(--ink-dim);
+    border-radius:10px; padding:8px 12px; font-weight:800; font-size:12px; cursor:pointer;
+  }
+
+  /* ---------- BOARD ---------- */
+  .board-wrap{
+    position:relative;
+    background:linear-gradient(180deg,#2a1c3f,#150b22);
+    border:3px solid var(--panel-edge);
+    border-radius:20px;
+    padding:8px;
+    box-shadow:inset 0 0 0 2px rgba(255,255,255,.03), 0 14px 30px rgba(0,0,0,.5);
+  }
+  canvas{
+    display:block;
+    width:100%;
+    height:auto;
+    border-radius:12px;
+    background:#0e0818;
+  }
+  .overlay{
+    position:absolute; inset:8px;
+    border-radius:12px;
+    background:rgba(10,6,18,.86);
+    display:flex; flex-direction:column; align-items:center; justify-content:center;
+    text-align:center; padding:20px;
+    gap:10px;
+  }
+  .overlay h2{
+    font-family:'Press Start 2P'; font-size:16px; color:var(--gold); margin:0 0 4px;
+    text-shadow:0 0 14px rgba(232,182,76,.5);
+  }
+  .overlay p{color:var(--ink-dim); font-size:13px; margin:0; line-height:1.6;}
+  .overlay .mini-btn{
+    margin-top:8px; padding:11px 22px; border:none; border-radius:12px;
+    background:linear-gradient(180deg, var(--blue), #206189); color:#fff;
+    font-family:'Press Start 2P'; font-size:11px; cursor:pointer;
+    box-shadow:0 5px 0 #163f57;
+  }
+  .overlay .mini-btn:active{transform:translateY(3px); box-shadow:0 2px 0 #163f57;}
+
+  /* ---------- CONTROLS ---------- */
+  .controls{
+    display:flex; justify-content:space-between; align-items:center;
+    width:100%; max-width:420px; margin-top:14px; gap:10px;
+  }
+  .dpad{display:grid; grid-template-columns:52px 52px; grid-template-rows:52px 52px; gap:8px;}
+  .cbtn{
+    background:linear-gradient(180deg,#2a1c40,#170e26);
+    border:1px solid var(--panel-edge);
+    border-radius:14px;
+    color:var(--ink);
+    font-size:22px;
+    display:flex; align-items:center; justify-content:center;
+    box-shadow:0 4px 0 #0c0714;
+    user-select:none;
+    cursor:pointer;
+  }
+  .cbtn:active{transform:translateY(3px); box-shadow:0 1px 0 #0c0714;}
+  .rotate-btn{
+    width:78px; height:78px; border-radius:50%;
+    background:linear-gradient(180deg, var(--purple), #5c3c92);
+    border:1px solid #7a52c4;
+    color:#fff; font-size:26px;
+    display:flex; align-items:center; justify-content:center;
+    box-shadow:0 5px 0 #402a68;
+    cursor:pointer;
+  }
+  .rotate-btn:active{transform:translateY(3px); box-shadow:0 2px 0 #402a68;}
+  .drop-btn{
+    width:60px; height:78px; border-radius:14px;
+    background:linear-gradient(180deg, var(--red), #8f2233);
+    border:1px solid #b5334a;
+    color:#fff; font-size:12px; font-weight:800;
+    display:flex; align-items:center; justify-content:center; text-align:center;
+    box-shadow:0 5px 0 #601422;
+    cursor:pointer;
+  }
+  .drop-btn:active{transform:translateY(3px); box-shadow:0 2px 0 #601422;}
+
+  .hint{color:var(--ink-dim); font-size:11px; margin-top:12px; text-align:center; max-width:420px;}
+  .hidden{display:none !important;}
+  @media (min-width:520px){
+    .hint{display:none;}
+  }
+</style>
+</head>
+<body>
+
+  <div class="brand">КАПСУЛЫ<span> vs </span>ФРУКТЫ</div>
+  <div class="tagline">выбери режим — уровни растут от лёгкого до сложного</div>
+
+  <div class="stage">
+
+    <!-- MENU -->
+    <div class="card" id="menu">
+      <p class="section-label">// РЕЖИМ</p>
+      <div class="mode-row">
+        <div class="mode-btn active" data-mode="pills">
+          <div class="ico">💊</div>
+          Капсулы
+        </div>
+        <div class="mode-btn" data-mode="fruits">
+          <div class="ico">🍇</div>
+          Фрукты
+        </div>
+      </div>
+
+      <p class="section-label">// СЛОЖНОСТЬ СТАРТА</p>
+      <div class="diff-row">
+        <div class="diff-btn active" data-diff="0">Лёгкий</div>
+        <div class="diff-btn" data-diff="1">Средний</div>
+        <div class="diff-btn" data-diff="2">Сложный</div>
+      </div>
+      <p class="diff-desc" id="diffDesc">Мало врагов, медленное падение — для разминки.</p>
+
+      <button class="play-btn" id="playBtn">▶ НАЧАТЬ ИГРУ</button>
+    </div>
+
+    <!-- HUD (shown in game) -->
+    <div class="hud hidden" id="hud">
+      <div class="hud-chip"><b id="scoreVal">0</b><span>ОЧКИ</span></div>
+      <div class="hud-chip"><b id="levelVal">1</b><span>УРОВЕНЬ</span></div>
+      <div class="hud-chip"><b id="enemyVal">0</b><span>ВРАГИ</span></div>
+      <div class="hud-btn" id="menuBtn">☰ Меню</div>
+    </div>
+
+    <!-- BOARD -->
+    <div class="board-wrap hidden" id="boardWrap">
+      <canvas id="board"></canvas>
+      <div class="overlay hidden" id="overlay">
+        <h2 id="overlayTitle">ПАУЗА</h2>
+        <p id="overlayText"></p>
+        <button class="mini-btn" id="overlayBtn">Продолжить</button>
+      </div>
+    </div>
+
+    <!-- CONTROLS -->
+    <div class="controls hidden" id="controls">
+      <div class="dpad">
+        <div class="cbtn" style="grid-column:1;grid-row:1" id="btnLeft">◀</div>
+        <div class="cbtn" style="grid-column:2;grid-row:1" id="btnRight">▶</div>
+        <div class="cbtn" style="grid-column:1/3;grid-row:2" id="btnDown">▼ мягко</div>
+      </div>
+      <div class="rotate-btn" id="btnRotate">⟳</div>
+      <div class="drop-btn" id="btnDrop">СБРОС</div>
+    </div>
+
+    <p class="hint hidden" id="keyHint">Клавиатура: ← → двигать · ↑ поворот · ↓ мягкое падение · пробел мгновенный сброс</p>
+  </div>
+
+<script>
+(function(){
+  "use strict";
+
+  /* ================= CONFIG ================= */
+  const COLS = 8, ROWS = 15;
+  let CELL = 40; // recomputed on resize
+
+  const PALETTES = {
+    pills: [
+      {name:'red',    fill:['#f0566f','#c0223f'], eye:'#3a0410'},
+      {name:'blue',   fill:['#4fbde8','#1c7aa8'], eye:'#062534'},
+      {name:'yellow', fill:['#f2cb55','#c98f14'], eye:'#3b2703'}
+    ],
+    fruits: [
+      {name:'apple',  emoji:'🍎'},
+      {name:'grape',  emoji:'🍇'},
+      {name:'lemon',  emoji:'🍋'},
+      {name:'cherry', emoji:'🍒'}
+    ]
+  };
+
+  const DIFF_PRESETS = [
+    {label:'Лёгкий',  startLevel:1, speedMul:1.0, desc:'Мало врагов, медленное падение — для разминки.'},
+    {label:'Средний', startLevel:6, speedMul:1.35, desc:'Больше врагов и заметно быстрее падение.'},
+    {label:'Сложный', startLevel:12, speedMul:1.8, desc:'Плотная доска и стремительная скорость — для мастеров.'}
+  ];
+
+  /* ================= STATE ================= */
+  let mode = 'pills';
+  let diffIdx = 0;
+  let colors = PALETTES.pills.length;
+
+  let board = [];         // board[r][c] = null | {kind:'enemy'|'piece', color:int}
+  let level = 1;
+  let score = 0;
+  let dropInterval = 900;
+  let speedMul = 1.0;
+  let enemyCount = 0;
+  let enemiesLeft = 0;
+
+  let cur = null;   // falling piece {cells:[{r,c,color}], orientation}
+  let nextColors = [0,0];
+  let lastTime = 0;
+  let acc = 0;
+  let softDrop = false;
+  let running = false;
+  let paused = false;
+  let rafId = null;
+
+  /* ================= DOM ================= */
+  const canvas = document.getElementById('board');
+  const ctx = canvas.getContext('2d');
+  const menu = document.getElementById('menu');
+  const hud = document.getElementById('hud');
+  const boardWrap = document.getElementById('boardWrap');
+  const controls = document.getElementById('controls');
+  const keyHint = document.getElementById('keyHint');
+  const overlay = document.getElementById('overlay');
+  const overlayTitle = document.getElementById('overlayTitle');
+  const overlayText = document.getElementById('overlayText');
+  const overlayBtn = document.getElementById('overlayBtn');
+  const scoreVal = document.getElementById('scoreVal');
+  const levelVal = document.getElementById('levelVal');
+  const enemyVal = document.getElementById('enemyVal');
+
+  /* ================= MENU WIRING ================= */
+  document.querySelectorAll('.mode-btn').forEach(btn=>{
+    btn.addEventListener('click', ()=>{
+      document.querySelectorAll('.mode-btn').forEach(b=>b.classList.remove('active'));
+      btn.classList.add('active');
+      mode = btn.dataset.mode;
+    });
+  });
+  document.querySelectorAll('.diff-btn').forEach(btn=>{
+    btn.addEventListener('click', ()=>{
+      document.querySelectorAll('.diff-btn').forEach(b=>b.classList.remove('active'));
+      btn.classList.add('active');
+      diffIdx = parseInt(btn.dataset.diff,10);
+      document.getElementById('diffDesc').textContent = DIFF_PRESETS[diffIdx].desc;
+    });
+  });
+  document.getElementById('playBtn').addEventListener('click', startGame);
+  document.getElementById('menuBtn').addEventListener('click', ()=>{
+    stopLoop();
+    menu.classList.remove('hidden');
+    hud.classList.add('hidden');
+    boardWrap.classList.add('hidden');
+    controls.classList.add('hidden');
+    keyHint.classList.add('hidden');
+  });
+  overlayBtn.addEventListener('click', ()=>{
+    if(overlayBtn.dataset.action === 'resume'){
+      hideOverlay(); paused=false; lastTime=performance.now(); loop(lastTime);
+    } else if(overlayBtn.dataset.action === 'next'){
+      hideOverlay(); nextLevel();
+    } else if(overlayBtn.dataset.action === 'restart'){
+      hideOverlay(); startGame();
+    }
+  });
+
+  /* ================= GAME SETUP ================= */
+  function startGame(){
+    colors = mode==='pills' ? PALETTES.pills.length : PALETTES.fruits.length;
+    const preset = DIFF_PRESETS[diffIdx];
+    level = preset.startLevel;
+    speedMul = preset.speedMul;
+    score = 0;
+    menu.classList.add('hidden');
+    hud.classList.remove('hidden');
+    boardWrap.classList.remove('hidden');
+    controls.classList.remove('hidden');
+    keyHint.classList.remove('hidden');
+    resizeCanvas();
+    setupLevel();
+    bindControlsOnce();
+    running = true; paused = false;
+    lastTime = performance.now();
+    loop(lastTime);
+  }
+
+  function nextLevel(){
+    level++;
+    setupLevel();
+    running = true; paused = false;
+    lastTime = performance.now();
+    loop(lastTime);
+  }
+
+  function setupLevel(){
+    board = Array.from({length:ROWS}, ()=>Array(COLS).fill(null));
+    enemyCount = Math.min(4 + level*3, 78);
+    placeEnemies(enemyCount);
+    enemiesLeft = countEnemies();
+    dropInterval = Math.max(900 - level*32, 140) / speedMul;
+    updateHud();
+    spawnPiece();
+    draw();
+  }
+
+  function placeEnemies(count){
+    const maxRow = ROWS - 1;
+    const minRow = 5; // keep top clear for spawning & fair start
+    let placed = 0;
+    let attempts = 0;
+    while(placed < count && attempts < count*40){
+      attempts++;
+      const r = minRow + Math.floor(Math.random()*(maxRow-minRow+1));
+      const c = Math.floor(Math.random()*COLS);
+      if(board[r][c]) continue;
+      const color = Math.floor(Math.random()*colors);
+      if(wouldMatch(r,c,color)) continue;
+      board[r][c] = {kind:'enemy', color};
+      placed++;
+    }
+  }
+
+  function countEnemies(){
+    let n=0;
+    for(let r=0;r<ROWS;r++) for(let c=0;c<COLS;c++) if(board[r][c] && board[r][c].kind==='enemy') n++;
+    return n;
+  }
+
+  function wouldMatch(r,c,color){
+    // check if placing this color at r,c creates a run of >=4 with existing neighbors
+    const get = (rr,cc)=> (rr>=0&&rr<ROWS&&cc>=0&&cc<COLS&&board[rr][cc]) ? board[rr][cc].color : null;
+    // horizontal
+    let run=1, cc=c-1;
+    while(get(r,cc)===color){run++;cc--;}
+    cc=c+1;
+    while(get(r,cc)===color){run++;cc++;}
+    if(run>=4) return true;
+    // vertical
+    run=1; let rr=r-1;
+    while(get(rr,c)===color){run++;rr--;}
+    rr=r+1;
+    while(get(rr,c)===color){run++;rr++;}
+    if(run>=4) return true;
+    return false;
+  }
+
+  /* ================= PIECE ================= */
+  function randColor(){ return Math.floor(Math.random()*colors); }
+
+  function spawnPiece(){
+    const c1 = randColor(), c2 = randColor();
+    const midL = Math.floor(COLS/2)-1, midR = Math.floor(COLS/2);
+    cur = {
+      orientation:'h', // h: two cells horizontal at row0; v: vertical
+      cells:[ {r:0,c:midL,color:c1}, {r:0,c:midR,color:c2} ]
+    };
+    if(board[0][midL] || board[0][midR]){
+      gameOver();
+      return;
+    }
+  }
+
+  function pieceCells(p){ return p.cells; }
+
+  function canPlace(cells){
+    for(const cell of cells){
+      if(cell.c<0 || cell.c>=COLS || cell.r>=ROWS) return false;
+      if(cell.r>=0 && board[cell.r][cell.c]) return false;
+    }
+    return true;
+  }
+
+  function tryMove(dr,dc){
+    if(!cur) return false;
+    const moved = cur.cells.map(cc=>({r:cc.r+dr, c:cc.c+dc, color:cc.color}));
+    if(canPlace(moved)){ cur.cells = moved; return true; }
+    return false;
+  }
+
+  function tryRotate(){
+    if(!cur) return;
+    const [a,b] = cur.cells;
+    if(cur.orientation==='h'){
+      // pivot around 'a', b goes above a
+      const na = {r:a.r, c:a.c, color:a.color};
+      const nb = {r:a.r-1, c:a.c, color:b.color};
+      if(canPlace([na,nb])){ cur.cells=[na,nb]; cur.orientation='v'; }
+    } else {
+      // vertical -> horizontal, pivot around bottom cell (a is top, b is bottom in our storage)
+      const bottom = cur.cells[0].r < cur.cells[1].r ? cur.cells[1] : cur.cells[0];
+      const topColor = cur.cells[0].r < cur.cells[1].r ? cur.cells[0].color : cur.cells[1].color;
+      let nc = bottom.c+1;
+      let na = {r:bottom.r, c:bottom.c, color:bottom.color};
+      let nb = {r:bottom.r, c:nc, color:topColor};
+      if(!canPlace([na,nb])){
+        nc = bottom.c-1;
+        nb = {r:bottom.r, c:nc, color:topColor};
+      }
+      if(canPlace([na,nb])){ cur.cells=[na,nb]; cur.orientation='h'; }
+    }
+  }
+
+  function hardDrop(){
+    if(!cur) return;
+    let moved=true;
+    while(moved){ moved = tryMove(1,0); }
+    lockPiece();
+  }
+
+  function lockPiece(){
+    for(const cell of cur.cells){
+      if(cell.r<0){ gameOver(); return; }
+      board[cell.r][cell.c] = {kind:'piece', color:cell.color};
+    }
+    cur = null;
+    resolveMatches(0);
+  }
+
+  /* ================= MATCH / GRAVITY ================= */
+  function findMatches(){
+    const marks = Array.from({length:ROWS}, ()=>Array(COLS).fill(false));
+    let found=false;
+    // horizontal
+    for(let r=0;r<ROWS;r++){
+      let c=0;
+      while(c<COLS){
+        const cell = board[r][c];
+        if(!cell){ c++; continue; }
+        let run=1;
+        while(c+run<COLS && board[r][c+run] && board[r][c+run].color===cell.color) run++;
+        if(run>=4){ for(let k=0;k<run;k++) marks[r][c+k]=true; found=true; }
+        c+=run;
+      }
+    }
+    // vertical
+    for(let c=0;c<COLS;c++){
+      let r=0;
+      while(r<ROWS){
+        const cell = board[r][c];
+        if(!cell){ r++; continue; }
+        let run=1;
+        while(r+run<ROWS && board[r+run][c] && board[r+run][c].color===cell.color) run++;
+        if(run>=4){ for(let k=0;k<run;k++) marks[r+k][c]=true; found=true; }
+        r+=run;
+      }
+    }
+    return found ? marks : null;
+  }
+
+  function resolveMatches(chain){
+    const marks = findMatches();
+    if(!marks){
+      afterSettle();
+      return;
+    }
+    let cleared=0, clearedEnemies=0;
+    for(let r=0;r<ROWS;r++) for(let c=0;c<COLS;c++){
+      if(marks[r][c]){
+        if(board[r][c].kind==='enemy') clearedEnemies++;
+        board[r][c]=null;
+        cleared++;
+      }
+    }
+    score += cleared*10 + chain*40;
+    enemiesLeft -= clearedEnemies;
+    updateHud();
+    draw();
+    setTimeout(()=>{
+      applyGravity();
+      draw();
+      setTimeout(()=>resolveMatches(chain+1), 140);
+    }, 160);
+  }
+
+  function applyGravity(){
+    for(let c=0;c<COLS;c++){
+      let write = ROWS-1;
+      for(let r=ROWS-1;r>=0;r--){
+        if(board[r][c]){
+          const cell = board[r][c];
+          board[r][c] = null;
+          board[write][c] = cell;
+          write--;
+        }
+      }
+    }
+  }
+
+  function afterSettle(){
+    if(enemiesLeft<=0){
+      levelComplete();
+      return;
+    }
+    spawnPiece();
+    draw();
+  }
+
+  /* ================= LOOP ================= */
+  function loop(t){
+    if(!running || paused) return;
+    const dt = t - lastTime;
+    lastTime = t;
+    acc += dt;
+    const interval = softDrop ? Math.max(dropInterval/6, 40) : dropInterval;
+    if(acc > interval){
+      acc = 0;
+      if(cur){
+        const ok = tryMove(1,0);
+        if(!ok) lockPiece();
+      }
+    }
+    draw();
+    rafId = requestAnimationFrame(loop);
+  }
+  function stopLoop(){ running=false; if(rafId) cancelAnimationFrame(rafId); }
+
+  function gameOver(){
+    running=false;
+    showOverlay('ИГРА ОКОНЧЕНА', `Счёт: ${score} · Уровень: ${level}`, 'Заново', 'restart');
+  }
+  function levelComplete(){
+    running=false;
+    showOverlay('УРОВЕНЬ ПРОЙДЕН!', `Счёт: ${score} · Следующий уровень: ${level+1}`, 'Далее ▶', 'next');
+  }
+  function showOverlay(title,text,btnLabel,action){
+    overlayTitle.textContent = title;
+    overlayText.textContent = text;
+    overlayBtn.textContent = btnLabel;
+    overlayBtn.dataset.action = action;
+    overlay.classList.remove('hidden');
+  }
+  function hideOverlay(){ overlay.classList.add('hidden'); }
+
+  function updateHud(){
+    scoreVal.textContent = score;
+    levelVal.textContent = level;
+    enemyVal.textContent = Math.max(enemiesLeft,0);
+  }
+
+  /* ================= DRAW ================= */
+  function resizeCanvas(){
+    const wrap = boardWrap.clientWidth || 380;
+    CELL = Math.floor((wrap-16) / COLS);
+    canvas.width = CELL*COLS;
+    canvas.height = CELL*ROWS;
+  }
+  window.addEventListener('resize', ()=>{ resizeCanvas(); draw(); });
+
+  function roundRect(x,y,w,h,r){
+    ctx.beginPath();
+    ctx.moveTo(x+r,y);
+    ctx.arcTo(x+w,y,x+w,y+h,r);
+    ctx.arcTo(x+w,y+h,x,y+h,r);
+    ctx.arcTo(x,y+h,x,y,r);
+    ctx.arcTo(x,y,x+w,y,r);
+    ctx.closePath();
+  }
+
+  function drawPillCell(x,y,color,kind){
+    const pal = PALETTES.pills[color];
+    const pad = CELL*0.08;
+    ctx.save();
+    roundRect(x+pad,y+pad,CELL-pad*2,CELL-pad*2, CELL*0.28);
+    const grad = ctx.createLinearGradient(x,y,x,y+CELL);
+    grad.addColorStop(0, pal.fill[0]);
+    grad.addColorStop(1, pal.fill[1]);
+    ctx.fillStyle = grad;
+    ctx.fill();
+    ctx.lineWidth = Math.max(1,CELL*0.05);
+    ctx.strokeStyle = 'rgba(0,0,0,.25)';
+    ctx.stroke();
+    if(kind==='enemy'){
+      // face
+      ctx.fillStyle = '#fff';
+      const ex = CELL*0.24, ey=CELL*0.36, er=CELL*0.09;
+      ctx.beginPath(); ctx.arc(x+ex, y+ey, er, 0, Math.PI*2); ctx.fill();
+      ctx.beginPath(); ctx.arc(x+CELL-ex, y+ey, er, 0, Math.PI*2); ctx.fill();
+      ctx.fillStyle = pal.eye;
+      ctx.beginPath(); ctx.arc(x+ex, y+ey, er*0.5, 0, Math.PI*2); ctx.fill();
+      ctx.beginPath(); ctx.arc(x+CELL-ex, y+ey, er*0.5, 0, Math.PI*2); ctx.fill();
+      // jagged mouth
+      ctx.strokeStyle = pal.eye;
+      ctx.lineWidth = Math.max(1,CELL*0.06);
+      ctx.beginPath();
+      const my = y+CELL*0.66, mx0=x+CELL*0.22, mx1=x+CELL*0.78;
+      ctx.moveTo(mx0,my);
+      const teeth=5;
+      for(let i=0;i<=teeth;i++){
+        const px = mx0 + (mx1-mx0)*(i/teeth);
+        const py = my + (i%2===0? CELL*0.09 : -CELL*0.02);
+        ctx.lineTo(px,py);
+      }
+      ctx.stroke();
+    } else {
+      // pill shine
+      ctx.fillStyle='rgba(255,255,255,.35)';
+      roundRect(x+CELL*0.18, y+CELL*0.16, CELL*0.22, CELL*0.14, CELL*0.06);
+      ctx.fill();
+    }
+    ctx.restore();
+  }
+
+  function drawFruitCell(x,y,color){
+    const pal = PALETTES.fruits[color];
+    ctx.save();
+    ctx.font = `${Math.floor(CELL*0.66)}px serif`;
+    ctx.textAlign='center';
+    ctx.textBaseline='middle';
+    ctx.fillText(pal.emoji, x+CELL/2, y+CELL/2+CELL*0.03);
+    ctx.restore();
+  }
+
+  function drawCell(r,c,color,kind){
+    const x=c*CELL, y=r*CELL;
+    if(mode==='pills') drawPillCell(x,y,color,kind);
+    else drawFruitCell(x,y,color);
+  }
+
+  function draw(){
+    ctx.clearRect(0,0,canvas.width,canvas.height);
+    // grid backdrop
+    ctx.fillStyle='rgba(255,255,255,.02)';
+    for(let r=0;r<ROWS;r++) for(let c=0;c<COLS;c++){
+      if((r+c)%2===0) ctx.fillRect(c*CELL,r*CELL,CELL,CELL);
+    }
+    for(let r=0;r<ROWS;r++) for(let c=0;c<COLS;c++){
+      const cell = board[r][c];
+      if(cell) drawCell(r,c,cell.color,cell.kind);
+    }
+    if(cur){
+      for(const cc of cur.cells){
+        if(cc.r>=0) drawCell(cc.r,cc.c,cc.color,'piece');
+      }
+    }
+  }
+
+  /* ================= CONTROLS ================= */
+  let controlsBound=false;
+  function bindControlsOnce(){
+    if(controlsBound) return;
+    controlsBound = true;
+
+    document.addEventListener('keydown', (e)=>{
+      if(!running || paused) return;
+      if(e.key==='ArrowLeft'){ tryMove(0,-1); draw(); e.preventDefault(); }
+      else if(e.key==='ArrowRight'){ tryMove(0,1); draw(); e.preventDefault(); }
+      else if(e.key==='ArrowUp'){ tryRotate(); draw(); e.preventDefault(); }
+      else if(e.key==='ArrowDown'){ softDrop=true; e.preventDefault(); }
+      else if(e.code==='Space'){ hardDrop(); draw(); e.preventDefault(); }
+    });
+    document.addEventListener('keyup', (e)=>{
+      if(e.key==='ArrowDown') softDrop=false;
+    });
+
+    const bindHold = (el, onDown, onUp)=>{
+      el.addEventListener('touchstart', (e)=>{ e.preventDefault(); onDown(); }, {passive:false});
+      el.addEventListener('mousedown', onDown);
+      if(onUp){
+        el.addEventListener('touchend', (e)=>{ e.preventDefault(); onUp(); }, {passive:false});
+        el.addEventListener('mouseup', onUp);
+        el.addEventListener('mouseleave', onUp);
+      }
+    };
+    bindHold(document.getElementById('btnLeft'), ()=>{ if(running&&!paused){tryMove(0,-1); draw();} });
+    bindHold(document.getElementById('btnRight'), ()=>{ if(running&&!paused){tryMove(0,1); draw();} });
+    bindHold(document.getElementById('btnRotate'), ()=>{ if(running&&!paused){tryRotate(); draw();} });
+    bindHold(document.getElementById('btnDrop'), ()=>{ if(running&&!paused){hardDrop(); draw();} });
+    bindHold(document.getElementById('btnDown'), ()=>{ softDrop=true; }, ()=>{ softDrop=false; });
+  }
+
+  /* initial draw so board isn't blank before first game */
+  resizeCanvas();
+
+})();
+</script>
+</body>
+</html>
